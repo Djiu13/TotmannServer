@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}Your Checks{% if tag_selected %} with tag <a href="{% url 'web:list_filter_by_tag' tag_selected %}" class="check-tag active">{{ tag_selected }}</a> 
+<small>(<a href="{% url 'web:list' %}">remove filter</a>)</small>{% endif %}{% endblock %}
+
+{% block content %}
+{% for tag in tags %}
+<a href="{% url 'web:list_filter_by_tag' tag %}" class="check-tag {% if tag.name == tag_selected %}active{% endif %}">{{ tag }}</a>
+{% endfor %}
+
+<table class="u-full-width">
+  <thead>
+    <tr>
+      <th style="width: 1em;"></th>
+      <th>Name</th>
+      <th>Last Success</th>
+      <th>History</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for check in checks_enabled %}
+    
+      <form action="{% url "web:toggle" %}" method="post">
+      {% csrf_token %}
+      <tr>
+	<td>{% if check.is_late %}<i class="fa fa-warning orange" title="Job is running late!"></i>{% endif %} {% if check.notifications.count == 0 %}<i class="fa fa-warning orange" title="No notifications are enabled for this check!"></i>{% endif %}</td>
+	<td><div>{% for tag in check.tags.all %}<a href="{% url 'web:list_filter_by_tag' tag %}" class="check-tag {% if tag.name == tag_selected %}active{% endif %}">{{ tag }}</a>{% endfor %}</div>{% if check.prefix %}{% ifchanged check.prefix %}<b>{% endifchanged %}{{ check.prefix }}{% ifchanged check.prefix %}</b>{% endifchanged %}/{% endif %}{{ check.name }}</td>
+	<td>{{ check.last_success.timestamp }}</td>
+	<td>{% for e in check.get_history %}<a href="{% url 'web:details' check.apikey %}#event-{{ e.id }}" title="{{ e.timestamp }}: {{ e.get_verbose_description }}"><i class="fa fa-stop status-{{ e.get_unified_status }}"></i></a>{% endfor %}</td>
+	<td>
+	  <a href="{% url "web:details" check.apikey %}#events">logs</a>
+	  <a href="{% url 'web:details' check.apikey %}">details</a>
+	  <button class="linkbutton" name="apikey" value="{{ check.apikey }}">disable</button></td>
+      </tr>
+      </form>
+      {% endfor %}
+      
+    <form action="{% url "web:check-add" %}" method="post">
+      {% csrf_token %}
+      <tr>
+	<td></td>
+	<td colspan="3"><input type="text" name="name" pattern=".{1,}" required placeholder="new check" style="width: 60%"></td>
+	<td><input type="submit" name="add" value="Add"></td>
+      </tr>
+    </form>
+  </tbody>
+</table>
+<h5>Disabled Checks</h5>
+<p>These checks are disabled and will not cause any notifications.</p>
+<table class="u-full-width">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Last Action</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <form action="{% url "web:toggle" %}" method="post">
+      {% csrf_token %}
+      {% for check in checks_disabled %}
+      <tr>
+	<td><div>{% for tag in check.tags.all %}<a href="{% url 'web:list_filter_by_tag' tag %}" class="check-tag {% if tag.name == tag_selected %}active{% endif %}">{{ tag }}</a>{% endfor %}</div>{% if check.prefix %}{% ifchanged check.prefix %}<b>{% endifchanged %}{{ check.prefix }}{% ifchanged check.prefix %}</b>{% endifchanged %}/{% endif %}{{ check.name }}</td>
+	<td>{{ check.last_action.timestamp }}</td>
+	<td><button class="linkbutton" name="apikey" value="{{ check.apikey }}">enable</button></td>
+      </tr>
+      {% endfor %}
+    </form>
+  </tbody>
+</table>
+
+<h4>Your Notification Channels.</h4>
+<p>Currently, only email notifications are supported. We
+  suggest to use <a href="https://pushover.net/" target="_blank">pushover</a> to
+  receive notifications on your smartphone.</p>
+
+<table class="u-full-width">
+  <thead>
+    <tr>
+      <th>E-Mail address</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <form action="{% url "web:notification-remove" %}" method="post">
+      {% csrf_token %}
+      {% for n in notifications %}
+      <tr>
+	<td>{{ n.address }}{% if not n.is_confirmed %} <i class="fa fa-warning gray" title="Please confirm email address! A message was sent to you, please click on link contained in that message."></i>{% endif %}</td>
+	<td><button class="linkbutton" name="remove-notification" value="{{ n.id }}">remove</button></td>
+      </tr>
+      {% endfor %}
+    </form>
+    <form action="{% url "web:notification-add" %}" method="post">
+      {% csrf_token %}
+      <tr>
+	<td><input type="email" name="email" placeholder="new address"></td>
+	<td><input type="submit" name="add" value="Add"></td>
+      </tr>
+    </form>
+  </tbody>
+</table>
+
+</form>
+{% endblock %}

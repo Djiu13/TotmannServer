@@ -1,0 +1,144 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Basic Page Needs
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta charset="utf-8">
+  <title>totmann, a dead man's switch for cron jobs</title>
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <!-- Mobile Specific Metas
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+  <!-- CSS
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="stylesheet" href="{% static "css/normalize.css" %}">
+  <link rel="stylesheet" href="{% static "css/skeleton.css" %}">
+
+  <!-- Favicon
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <link rel="icon" type="image/png" href="{% static "images/favicon.png" %}">
+  <style>
+    .green {
+    color: #494;
+    }
+    .red {
+    color: #944;
+    }
+    .orange {
+    color: #f90;
+    }
+    .gray {
+    color: #ccc;
+    }
+    .linkbutton, .linkbutton:focus {
+    background:none!important;
+    border:none; 
+    padding:0!important;
+    color: #1EAEDB;
+    cursor:pointer;
+    text-decoration: underline;
+    text-transform: none;
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    
+    }
+    .linkbutton:hover {
+    color: #0FA0CE;
+    }
+    .url {
+    font-family: monospace;
+    }
+
+    #id_notifications {
+    width: 50%;
+    height: 100px;
+    }
+
+    .status-failed {
+    color: #944;
+    }
+    .status-warning {
+    color: #f90;
+    }
+    .status-started {
+    color: #ccc;
+    }
+    .status-log {
+    color: #ccc;
+    }
+    .status-finished {
+    color: #494;
+    }
+    #watermark
+    {
+    position:relative;
+    right: 13em;
+    opacity:0.1;
+    z-index:99;
+    text-align: left;
+    width: 10em;
+    height: 0px;
+    top: -2.6em;
+    }
+    #watermark a
+    {
+    display: block;
+    color:black !important;
+    text-decoration: none;
+    font-size: 10em;
+    transform: rotate(-90deg);
+    direction: rtl;
+    }
+    .legal {
+    color:#999;
+    }
+    .with-top-margin {
+    margin-top: 10%;
+    }
+    .check-tag {
+    border-radius: 4px;
+    background-color: #ccc;
+    padding: 0px 4px;
+    margin-right: 3px;
+    text-decoration: none;
+    color: inherit;
+    }
+    .check-tag.active {
+    background-color: #669;
+    color: #ddd;
+    }
+    
+  </style>
+</head>
+<body>
+  <!-- Primary Page Layout
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+  <div class="container">
+    <div class="row">
+      <div class="{% block width %}twelve columns{% endblock %} with-top-margin">
+	<div id="watermark"><a href="{% url "home" %}">totmann</a></div>
+	{% block extralinks %}{% endblock %}
+	<h4>{% block title %}Totmann{% endblock %}.</h4>
+	{% block content %}No content.{% endblock %}
+
+
+	</div>
+      {% block second_column %}{% endblock %}
+    </div>
+    {% if user.is_authenticated %}<div id="userfooter row">logged in as {{ user }}. <a href="{% url 'auth_logout' %}">log out.</a>{% endif %}
+  </div>
+
+<!-- End Document
+  –––––––––––––––––––––––––––––––––––––––––––––––––– -->
+</body>
+</html>

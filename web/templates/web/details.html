@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load absurl %}
+
+{% block title %}View/edit check{% endblock %}
+{% block extralinks %}<a href="{% url "web:list" %}">home</a> <a href="#events">event log</a> <a href="#reporting">reporting URLs</a>{% endblock %}
+{% block content %}
+<script>
+function check_remove() {
+    return confirm("Do you want to delete this check?");
+}
+function change_reporting_urls(sel) {
+    show_hide_class("plain", sel == "plain");
+    show_hide_class("wget", sel == "wget");
+    show_hide_class("curl", sel == "curl");
+}
+function show_hide_class(cls, show) {
+    var elements = document.querySelectorAll("." + cls);
+    var i;
+    for (i = 0; i < elements.length; i++) {
+	elements[i].style.display = show ? "initial" : "none";
+    }
+}
+
+</script>
+
+{{ form.errors }}
+<form action="{% url 'web:details' check.apikey %}#settings" method="post">
+  {% csrf_token %}
+  <div class="row">
+    </div>
+  <div id="settings" class="row">
+    {{ form.name.label_tag }}
+    {% if form.name.help_text %}
+    <div class="help">{{ form.name.help_text }}</div>
+    {% endif %}
+    {{ form.prefix }}/{{ form.name }}
+    {{ form.prefix.errors }}
+    {{ form.name.errors }}
+  </div>
+  <div class="row">
+    {{ form.tags.label_tag }}
+    {% if form.tags.help_text %}
+    <div class="help">{{ form.tags.help_text }}</div>
+    {% endif %}
+    {{ form.tags }}
+    {{ form.tags.errors }}
+  </div>
+  <div class="row">
+    {{ form.interval.label_tag }}
+    {% if form.interval.help_text %}
+    <div class="help">{{ form.interval.help_text }}</div>
+    {% endif %}
+    {{ form.interval }}
+    {{ form.interval.errors }}
+  </div>
+  <div class="row">
+    {{ form.expected_regex.label_tag }}
+    {% if form.expected_regex.help_text %}
+    <div class="help">{{ form.expected_regex.help_text }}</div>
+    {% endif %}
+    <input type="text" name="{{ form.expected_regex.html_name }}" name="{{ form.expected_regex.id_for_label }}" value="{{ form.expected_regex.value }}" class="u-full-width">
+    {{ form.expected_regex.errors }}
+  </div>
+  <div class="row">
+    {{ form.alert_regex.label_tag }}
+    {% if form.alert_regex.help_text %}
+    <div class="help">{{ form.alert_regex.help_text }}</div>
+    {% endif %}
+    <input type="text" name="{{ form.alert_regex.html_name }}" name="{{ form.alert_regex.id_for_label }}" value="{{ form.alert_regex.value }}" class="u-full-width">
+    {{ form.alert_regex.errors }}
+  </div>
+  <div class="row">
+    {{ form.allowed_return_codes.label_tag }}
+    {% if form.allowed_return_codes.help_text %}
+    <div class="help">{{ form.allowed_return_codes.help_text }}</div>
+    {% endif %}
+    {{ form.allowed_return_codes }}
+    {{ form.allowed_return_codes.errors }}
+  </div>
+  <div class="row">
+    {{ form.store_events.label_tag }}
+    {% if form.store_events.help_text %}
+    <div class="help">{{ form.store_events.help_text }}</div>
+    {% endif %}
+    {{ form.store_events }}
+    {{ form.store_events.errors }}
+  </div>
+  <div class="row">
+    {{ form.notifications.label_tag }}
+    {% if form.notifications.help_text %}
+    <div class="help">{{ form.notifications.help_text }}</div>
+    {% endif %}
+    {% for radio in form.notifications %}
+    <label for="{{ radio.id_for_label }}">
+      <span class="radio">{{ radio.tag }}</span>
+      <span class="label-body">{{ radio.choice_label }}</span>
+    </label>
+    {% endfor %}
+    {{ form.notifications.errors }}
+  </div>
+  <button type="submit" class="button-primary" name="action" value="save">Save changes</button>   <button type="submit" name="action" value="remove" onclick="return check_remove();">Remove check</button></form>
+<h4 id="events">Event log</h4>
+{% if check.is_late %}
+<p>
+  <i class="fa fa-warning orange"></i> This job is running late!
+</p>
+{% endif %}
+<p>{{ events.paginator.count }} events recorded</p>
+<form>
+  <table class="u-full-width" id="events">
+    <thead>
+      <tr>
+	<th style="width: 1em;"></th>
+	<th>Type</th>
+	<th>Date/Time</th>
+	<th>Output/Return Code</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if events.has_previous %}
+      <tr>
+	<td colspan="4" style="text-align: center">
+          showing page {{ events.number }} of {{events.paginator.num_pages }} &middot; <a href="?page={{ events.previous_page_number }}#events">previous</a>
+	</td>
+      </tr>
+w      {% endif %}
+      {% for e in events %}
+      <tr id="event-{{ e.id }}">
+	<td><i class="fa fa-stop status-{{ e.get_unified_status }}" title="{{ e.get_verbose_description }}"></i></td>
+	<td>{{ e.event }}</td>
+	<td>{{ e.timestamp }}</td>
+	<td style="width:60%">{% if e.event == 'finished' %}return code: {{ e.content }}{% elif e.event == 'log' %}<textarea  style="width:100%; height:100px;">{{ e.content }}</textarea>{% endif %}</td>
+      </tr>
+      {% endfor %}
+      {% if events.has_next %}
+      <tr>
+	<td colspan="4" style="text-align: center">
+          showing page {{ events.number }} of {{events.paginator.num_pages }} &middot; <a href="?page={{ events.next_page_number }}#events">next</a>
+	</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</form>
+
+<h5 id="reporting">Reporting URLs</h5>
+<p>All URLs must be called via POST requests.</p>
+<p>
+  <label for="show-urls">Show URLs: </label>
+  <select id="show-urls" onchange="change_reporting_urls(this.value);">
+    <option value="plain">plain</option>
+    <option value="curl">for curl</option>
+    <option value="wget">for wget</option>
+  </select>
+</p>
+<p>
+
+  <div class="plain">
+    <label>To notify totmann of the start time of a job run:</label>
+    <span>Send a POST request to <span class="url">{% absurl 'core:event-start' check.apikey %}</span></span>
+    <label>To log a successful run (or an error code for an unsuccessful run):</label>
+    <span>Send a POST request to <span class="url">{% absurl 'core:event-finished' check.apikey %}</span> . The request may contain the numeric return code of the command in the body of the request (without any further encapsulation).</span>
+    <label>To send the output of a command to totmann:</label>
+    <span>Send a POST request containing the log file (without any further encapsulation or encoding) to <span class="url">{% absurl 'core:event-log' check.apikey %}</span></span>
+  </div>
+
+  
+  <div class="wget">
+    <label>To notify totmann of the start time of a job run:</label>
+    <span class="url">wget --post-data='' -O/dev/null --quiet {% absurl 'core:event-start' check.apikey %}</span>
+    <label>To log a successful run (or an error code for an unsuccessful run):</label>
+    <span class="url">wget --post-data="$?" -O/dev/null --quiet {% absurl 'core:event-finished' check.apikey %}</span>
+    <label>To send the output of a command to totmann:</label>
+    <span class="url">wget --post-file=/tmp/logfile -O/dev/null --quiet {% absurl 'core:event-log' check.apikey %}</span>
+    <label>Wrapper script using wget:</label>
+    <p>Usage: <span class="url">./totmann-wrapper.sh {{ check.apikey }} command arg1 arg2...</span></p>
+    <pre class="url">
+#!/bin/bash
+if [ "$#" -lt 3 ]
+then
+    exit "Usage: $0 apikey command"
+fi
+APIKEY="$1"
+shift
+COMMAND="$@"
+wget --post-data='' -O/dev/null --quiet {% absurl 'core:event-start' '$APIKEY' %}
+"$@" > /tmp/totmann-output 2>&1
+wget --post-data="$?" -O/dev/null --quiet {% absurl 'core:event-finished' '$APIKEY' %}
+wget --post-file=/tmp/totmann-output -O/dev/null --quiet {% absurl 'core:event-log' '$APIKEY' %} && rm /tmp/totmann-output
+</pre>
+</div>
+
+
+<div class="curl">
+  <label>To notify totmann of the start time of a job run:</label>
+  <span class="url">curl -fsS -o /dev/null --data-binary '' {% absurl 'core:event-start' check.apikey %}</span>
+  <label>To log a successful run (or an error code for an unsuccessful run):</label>
+  <span class="url">curl -fsS -o /dev/null --data-binary "$?" {% absurl 'core:event-finished' check.apikey %}</span>
+  <label>To send the output of a command to totmann:</label>
+  <span class="url">curl -fsS -o /dev/null --data-binary @/tmp/logfile {% absurl 'core:event-log' check.apikey %}</span>
+  <label>Wrapper script using curl:</label>
+  <p>Usage: <span class="url">./totmann-wrapper.sh {{ check.apikey }} command arg1 arg2...</span></p>
+  <pre class="url">
+#!/bin/bash
+if [ "$#" -lt 3 ]
+then
+    exit "Usage: $0 apikey command"
+fi
+APIKEY="$1"
+shift
+COMMAND="$@"
+curl -fsS -o /dev/null --data-binary '' {% absurl 'core:event-start' '$APIKEY' %}
+"$@" > /tmp/totmann-output 2>&1
+curl -fsS -o /dev/null --data-binary "$?" {% absurl 'core:event-finished' '$APIKEY' %}
+curl -fsS -o /dev/null --data-binary @/tmp/totmann-output {% absurl 'core:event-log' '$APIKEY' %}</pre>
+</div>
+  <script>
+    change_reporting_urls('plain');
+  </script>
+</p>
+
+{% endblock %}
