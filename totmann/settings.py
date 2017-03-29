@@ -22,7 +22,7 @@ SECRET_KEY = 'sl7!ue-#1=@0=(y)(bq4w3a&&g#%=z&x8m*fb)*zi*g6kfxyu&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -72,7 +72,6 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
-                'django.core.context_processors.request',
             ],
             'debug': True,
         },
@@ -123,4 +122,4 @@ TOTMANN_EXPECT_CRON = 2 * 60 # expect a cron job run at least every 2 minutes (o
 try:
     from settings_local import *
 except ImportError:
-    print "Not using local settings file settings_local.py"
+    print ("Not using local settings file settings_local.py")

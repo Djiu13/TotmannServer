@@ -1,5 +1,5 @@
 from django.contrib import admin
-from models import Check, CheckEvent, NotificationReceiver
+from core.models import Check, CheckEvent, NotificationReceiver
 
 admin.site.register(Check)
 admin.site.register(CheckEvent)

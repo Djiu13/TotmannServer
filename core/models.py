@@ -88,7 +88,7 @@ def regex_validator(value):
         return
     try:
         re.compile(value)
-    except Exception, e:
+    except Exception as e:
         raise ValidationError("Illegal Regex Syntax: %s" % e.message)
 
 class Check(models.Model):
