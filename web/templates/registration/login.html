@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}Welcome{% endblock %}
+{% block width %}one-half column{% endblock %}
+{% block content %}
+<p>Totmann is a <b>dead man's switch or watchdog timer for your cron
+jobs.</b> It notifies you via email when your scheduled jobs are not
+running on time, or when jobs finish with errors. Use it, for example,
+to make sure that your backup is running on time and not out of space
+or as a simple machine uptime monitoring tool.</p>
+<h5>How does it work?</h5>
+<p>Totmann provides a REST interface. Whenever a cron job finishes, it
+simply posts to a specific URL to let totmann know that the job
+finished. That means, you're only <b>one call to wget/curl</b> away
+from adding totmann to your cron jobs! Your job can optionally
+transfer the return code its main command to totmann to distinguish
+whether the command encountered errors or not.</p>
+<p>Additionally, there are URLs for logging when the <b>job
+started</b> and to transfer the <b>job's logfile</b> to totmann. Using
+these features is optional. The logfile can be checked against regular
+expressions to detect warnings or malformed output.</p>
+<p>Whenever a command <b>did not finish successfully in a defined
+interval</b> or an error condition was detected, totmann can notify
+you via email. You can use services such as Pushover or IFTTT to
+create individual notification channels. (Note that you can even call
+totmann from IFTTT, see below.)</p>
+<p>totmann logs a configurable number of events for your cron jobs to
+  assist in debugging your jobs.</p>
+<h5>What can I do with totmann?</h5>
+<ul>
+  <li>Use it to make sure that not only your <b>backup job</b> is running on
+  time, but also to detect whether the backup command finished without
+    errors.</li>
+  <li>Make sure that your automated compile job <b>does not output
+    warnings.</b></li>
+  <li>Let your Raspberry Pi ping totmann to ensure that the Pi <b>has not
+    crashed</b> and has internet connectivity.</li>
+  <li>Use IFTTT to send a request to totmann every time it is raining
+  and get a <b>reminder to water your plants</b> after a few days without
+  rain.</li>
+  <li>Use it as a real <b>dead (wo)man's switch</b> to reveal your
+  master password to your loved ones if you didn't show any signs of
+  life in the past 14 days (some IFTTT wiring needed).</li>
+  <li>...</li>
+</ul>
+<h5>Why not use icinga/nagios/...?</h5>
+<p>If you need or already have a full-fledged monitoring system,
+  totmann is not what you want. If for whatever reason you don't want
+  to set up a monitoring system, if you want to monitor your
+  monitoring, if you want to connect to IFTTT as shown above, or if
+  you just need a very simple, basic monitoring system with a nice web
+  interface, use totmann.</p>
+<h5>Under development!</h5><p>totmann is not thoroughly tested yet. If
+you encounter any bugs or if you want to suggest enhancements,
+please <a href="https://bitbucket.org/webhamster/totmann/issues?status=new&status=open"
+target="_blank">file a bug</a>.</p>
+    
+<h5>Don't trust us!</h5>
+<p>Totmann is open source
+software. <a href="https://bitbucket.org/webhamster/totmann"
+target="_blank">Setup your own server!</a></p>
+<p>Note that although totmann has a built-in detection for when its
+  own cron job does not run on time, we provide totmann as a
+  best-effort service and thus do not take any liability should
+  totmann fail to notify you. If you want to ensure timely
+  notifications, review the code, setup totmann on distributed
+  servers, etc.; do not use totmann to ensure the safety of persons
+  (that's what the
+  original <a href="https://de.wikipedia.org/wiki/Totmanneinrichtung"
+  target="_blank">Totmannschalter</a> is for)!
+  </p> {% endblock %}
+
+{% block second_column %}
+<div class="one-half column with-top-margin">
+  {% if user.is_authenticated %}
+  <div>
+    <h5>{{ user }}</h5>
+    <p><a href="{% url "web:list" %}">Manage your checks</a></p>
+    <p><a href="{% url "password_change" %}">Change your password</a></p>
+  </div>
+  {% else %}
+  <form method="post" action="">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="{% trans 'Log in' %}" />
+    <input type="hidden" name="next" value="{{ next }}" />
+  </form>
+  <p><a href="{% url 'registration_register' %}">Register now</a></p>
+  <p><a href="{% url 'password_reset' %}">Reset your password</a></p>
+  {% endif %}
+</div>
+{% endblock %}
