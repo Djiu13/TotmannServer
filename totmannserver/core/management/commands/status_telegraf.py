@@ -22,4 +22,4 @@ class Command(BaseCommand):
         for c in checks:
             service = self.escape_tag(c.name)
             state = 0 if not c.is_late() else 1
-            print 'totmann_check,service=%s%s is_late=%d' % (service, tags, state)
+            print ('totmann_check,service=%s%s is_late=%d' % (service, tags, state))

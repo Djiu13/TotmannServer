@@ -1,0 +1,25 @@
+<html>
+  <h1>Welcome to Totmann, a Dead Man's Switch for Cron Jobs</h1>
+  {% if user.is_authenticated %}
+  <h2>Welcome {% user.name %}</h2>
+  
+  {% else %}
+  <h2>Please log in or sign up</h2>
+  <h3>Log In</h3>
+  <form action="{% url 'core:login' %}" method="post">
+    {% csrf_token %}
+    Username: <input type="text" name="username" /><br>
+    Password: <input type="text" name="password" /><br>
+    <button type="submit" name="action" value="login">Log In</button>
+  </form>
+  <h3>Create User Account</h3>
+  <form action="{% url 'core:signup' %}" method="post">
+    {% csrf_token %}
+    Username: <input type="text" name="username" /><br>
+    E-Mail address: <input type="text" name="email" /><br>
+    Password: <input type="text" name="password" /><br>
+    Password: <input type="text" name="password" /><br>
+    <button type="submit" name="action" value="login">Log In</button>
+  </form>
+  {% endif %}
+</html>

@@ -31,7 +31,7 @@ class CheckEvent(models.Model):
     event = models.CharField(max_length = 10, choices = EVENTS, default = EVENT_FINISHED)
     content = models.TextField(blank=True)
 
-    def __unicode__(self):
+    def __str__(self):
         checkmark = u" ✓" if self.is_success() else u" ⚠" if self.is_violation() else u""
         return u"%s%s | %s | %s" % (dict(CheckEvent.EVENTS)[self.event], checkmark, self.source.name, self.timestamp.strftime("%c") if self.timestamp else "")
 
@@ -109,7 +109,7 @@ class Check(models.Model):
     last_late_notification = models.DateTimeField(editable=False,
                                                   null=True, blank=True, default=None)
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s | %s" % (self.name, reverse('core:event-finished', args=[self.apikey]))
 
     def allowed_return_codes_list(self):
@@ -192,19 +192,22 @@ class Check(models.Model):
     def get_prefix_for_email(self):
         return '[%s] ' % self.prefix if self.prefix else ''
 
+    def get_prefix_for_web(self):
+        return '%s/' % self.prefix if self.prefix else ''
+
     class Meta:
         ordering = ['prefix', 'name']
 
 
 def create_confirmation_token():
-    return hashlib.sha256(str(uuid.uuid4()) + settings.SECRET_KEY).hexdigest()[:10]
+    return hashlib.sha256(uuid.uuid4().bytes + settings.SECRET_KEY.encode('ascii')).hexdigest()[:10]
 
 class NotificationReceiver(models.Model):
     owner = models.ForeignKey(User)
     address = models.CharField(max_length = 128)
     confirmation_token = models.CharField(max_length=64, default=create_confirmation_token, blank=True, null=True) # empty confirmation token means that no further confirmation is needed
 
-    def __unicode__(self):
+    def __str__(self):
         return "%s" % (self.address)
 
     def is_confirmed(self):

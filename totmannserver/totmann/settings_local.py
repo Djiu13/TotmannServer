@@ -9,14 +9,14 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 # Configure the path and URL for static files
-STATIC_ROOT = os.path.join(BASE_DIR, "public")
-STATIC_URL = '/'
+#STATIC_ROOT = os.path.join(BASE_DIR, "public")
+#STATIC_URL = '/'
 
 # Add your hostname here
-ALLOWED_HOSTS = ['totmann.example']
+ALLOWED_HOSTS = ['*']
 
 # For testing, enable debugging (but never in production!)
-# DEBUG = True
+DEBUG = False
 # TEMPLATE_DEBUG = True
 
 # Configure a database here (omit if you want to use sqlite as configured in settings.py)
@@ -30,7 +30,7 @@ ALLOWED_HOSTS = ['totmann.example']
 #    }
 # }
 
-SECRET_KEY = '--some random string here, e.g., 64 random characters--'
+#SECRET_KEY = '--some random string here, e.g., 64 random characters--'
 
 # Needed only if run behind a proxy.
 # SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_SSL', 'on')
