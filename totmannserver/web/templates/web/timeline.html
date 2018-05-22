@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% block title %}Timeline (last 24 hours){% endblock %}
+
+{% block content %}
+<div id="visualization" style="position: absolute; left: 0px; width: 100%;"></div>
+
+<style>
+  .vis-item.started {
+  border-color: blue;
+  }
+
+  .vis-item.failed {
+  border-color: red;
+  }
+
+  .vis-item.warning {
+  border-color: #f90;
+  }
+
+  .vis-item.log {
+  border-color: #ddd;
+  }
+
+  .vis-item.finished {
+  border-color: #090;
+  }
+</style>
+
+<script>
+  var groups = new vis.DataSet({{ groups_json|safe }});
+
+  // create a dataset with items
+  // note that months are zero-based in the JavaScript Date object, so month 3 is April
+  var items = new vis.DataSet({{ events_json|safe }});
+
+  // create visualization
+  var container = document.getElementById('visualization');
+  var options = {
+    // option groupOrder can be a property name or a sort function
+    // the sort function must compare two groups and return a value
+    //     > 0 when a > b
+    //     < 0 when a < b
+    //       0 when a == b
+    groupOrder: function (a, b) {
+      return a.value - b.value;
+    },
+			timeAxis: {
+			scale: 'hour',
+			step: 1
+			},
+			end: new Date(),
+			start: new Date((new Date()).getTime() - 24*60*60000),
+			stack: false,
+  };
+
+  var timeline = new vis.Timeline(container);
+  timeline.setOptions(options);
+  timeline.setGroups(groups);
+  timeline.setItems(items);
+
+</script>
+
+
+{% endblock %}

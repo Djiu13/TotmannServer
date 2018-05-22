@@ -22,7 +22,7 @@ SECRET_KEY = 'sl7!ue-#1=@0=(y)(bq4w3a&&g#%=z&x8m*fb)*zi*g6kfxyu&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -72,6 +72,7 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'django.template.context_processors.tz',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.request',
             ],
             'debug': True,
         },
@@ -107,7 +108,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.7/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/'
 
 EMAIL_FROM = 'notification@totmann.danielfett.de'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -120,6 +121,6 @@ TOTMANN_EXPECT_CRON = 2 * 60 # expect a cron job run at least every 2 minutes (o
 
 ### NO DEFAULT SETTING BELOW THIS POINT ###
 try:
-    from settings_local import *
+    from .settings_local import *
 except ImportError:
     print ("Not using local settings file settings_local.py")

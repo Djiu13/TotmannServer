@@ -6,9 +6,11 @@ from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
 import re
 from django.contrib.auth.decorators import login_required
-from forms import EditCheckForm
+from .forms import EditCheckForm
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from tagging.models import Tag, TaggedItem
+import json
+from datetime import datetime, timedelta
 
 def home(request):
     return render(request, 'web/home.html', {} )
@@ -31,6 +33,36 @@ def list(request, tag_selected=None):
         'notifications' : notifications,
         'tags': tags,
         'tag_selected': tag_selected,
+        })
+
+@login_required
+def timeline(request):
+    groups_data = models.Check.objects.filter(owner=request.user, enabled=True).order_by('prefix', 'name').distinct().all()
+
+    groups_json = []
+    for x in groups_data:
+        groups_json.append({'id': x.id, 'content': x.get_prefix_for_web() + x.name})
+
+    events_json = []
+    checks_enabled = models.Check.objects.filter(enabled=True, owner=request.user).order_by('prefix', 'name').all()
+    for check in checks_enabled:
+        events = models.CheckEvent.objects.filter(source=check, timestamp__gte=datetime.now() - timedelta(hours=24)).order_by('-timestamp').all()
+        for event in events:
+            events_json.append({
+                'id': event.id,
+                'group': event.source.id,
+                'title': unicode(event),
+                'start': event.timestamp.isoformat(),
+                'type': 'point',
+                'className': event.get_unified_status(),
+                'subgroup': event.get_unified_status() + check.name,
+            })
+        
+            
+        
+    return render(request, 'web/timeline.html', {
+        'groups_json': json.dumps(groups_json),
+        'events_json': json.dumps(events_json),
         })
 
 @login_required
